@@ -277,14 +277,11 @@ export default function IconEditorPage({
 
         {/* ── Editor layout ─────────────────────────────────────────────── */}
         <div
+          className="editor-grid"
           style={{
             maxWidth: "1200px",
             margin: "0 auto",
             padding: "32px 24px",
-            display: "grid",
-            gridTemplateColumns: "1fr 360px",
-            gap: "24px",
-            alignItems: "start",
           }}
         >
           {/* Left: Preview ──────────────────────────────────────────────── */}
