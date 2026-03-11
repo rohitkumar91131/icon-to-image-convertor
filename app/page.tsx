@@ -71,13 +71,18 @@ export default function HomePage() {
           </p>
 
           {/* CTAs */}
+          {/* Use native <a> tags so the browser always scrolls to the section,
+              even when the URL hash is already "#editor" or "#packs".
+              Next.js <Link> relies on the client-side router which skips
+              navigation when the target URL matches the current URL, preventing
+              consecutive clicks from working. */}
           <div className="animate-fade-up delay-300 hero-ctas" style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
-            <Link href="#editor" style={{ padding: "13px 28px", borderRadius: "10px", background: "#ffffff", color: "#000000", fontSize: "15px", fontWeight: 600, textDecoration: "none", letterSpacing: "-0.01em", display: "inline-block" }}>
+            <a href="#editor" style={{ padding: "13px 28px", borderRadius: "10px", background: "#ffffff", color: "#000000", fontSize: "15px", fontWeight: 600, textDecoration: "none", letterSpacing: "-0.01em", display: "inline-block" }}>
               Try the Editor →
-            </Link>
-            <Link href="#packs" style={{ padding: "13px 28px", borderRadius: "10px", border: "1px solid var(--border-strong)", background: "transparent", color: "#ffffff", fontSize: "15px", fontWeight: 600, textDecoration: "none", letterSpacing: "-0.01em" }}>
+            </a>
+            <a href="#packs" style={{ padding: "13px 28px", borderRadius: "10px", border: "1px solid var(--border-strong)", background: "transparent", color: "#ffffff", fontSize: "15px", fontWeight: 600, textDecoration: "none", letterSpacing: "-0.01em" }}>
               Browse Icon Packs
-            </Link>
+            </a>
           </div>
 
           {/* Workflow steps */}
