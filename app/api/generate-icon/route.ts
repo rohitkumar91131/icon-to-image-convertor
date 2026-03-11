@@ -8,7 +8,7 @@ import sharp from "sharp";
 const { renderToStaticMarkup } = require("react-dom/server") as typeof import("react-dom/server");
 
 /** Supported output formats. */
-const SUPPORTED_FORMATS = ["png", "ico", "jpeg", "webp"] as const;
+const SUPPORTED_FORMATS = ["png", "ico", "jpeg", "webp", "svg"] as const;
 type OutputFormat = (typeof SUPPORTED_FORMATS)[number];
 
 /**
@@ -169,6 +169,18 @@ export async function GET(request: NextRequest) {
   // If no width/height attributes exist at all, inject them after the opening <svg tag.
   if (!svgString.includes(`width="${size}"`)) {
     svgString = svgString.replace("<svg", `<svg width="${size}" height="${size}"`);
+  }
+
+  // If SVG format is requested, return the prepared SVG string directly
+  // (skip the rasterisation pipeline entirely).
+  if (format === "svg") {
+    return new NextResponse(svgString as unknown as BodyInit, {
+      status: 200,
+      headers: {
+        "Content-Type": "image/svg+xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
   }
 
   // Convert SVG buffer to PNG using sharp
