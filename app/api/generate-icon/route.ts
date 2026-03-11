@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import React from "react";
 import sharp from "sharp";
 
+/** CORS headers applied to every response so external developers can use the API. */
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 // Use dynamic import to avoid Turbopack's static analysis restrictions
 // on react-dom/server in API route contexts.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -95,18 +102,87 @@ async function resolveIcon(
 }
 
 /**
+ * Parses a CSS color value (hex or named) and returns a sharp-compatible RGBA
+ * object, or null if the value represents "transparent".
+ */
+function parseBackground(
+  raw: string
+): { r: number; g: number; b: number; alpha: number } | null {
+  const v = raw.trim().toLowerCase();
+  if (v === "transparent" || v === "none" || v === "") return null;
+
+  // 6-digit hex: #rrggbb
+  const hex6 = v.match(/^#?([0-9a-f]{6})$/);
+  if (hex6) {
+    const n = parseInt(hex6[1], 16);
+    return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff, alpha: 1 };
+  }
+
+  // 3-digit hex: #rgb
+  const hex3 = v.match(/^#?([0-9a-f]{3})$/);
+  if (hex3) {
+    const [, h] = hex3;
+    return {
+      r: parseInt(h[0] + h[0], 16),
+      g: parseInt(h[1] + h[1], 16),
+      b: parseInt(h[2] + h[2], 16),
+      alpha: 1,
+    };
+  }
+
+  // rgb(r,g,b)
+  const rgb = v.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/);
+  if (rgb) {
+    return {
+      r: Math.min(255, parseInt(rgb[1])),
+      g: Math.min(255, parseInt(rgb[2])),
+      b: Math.min(255, parseInt(rgb[3])),
+      alpha: 1,
+    };
+  }
+
+  // Named colours (common subset)
+  const NAMED: Record<string, [number, number, number]> = {
+    white: [255, 255, 255],
+    black: [0, 0, 0],
+    red: [255, 0, 0],
+    green: [0, 128, 0],
+    blue: [0, 0, 255],
+    yellow: [255, 255, 0],
+    gray: [128, 128, 128],
+    grey: [128, 128, 128],
+  };
+  if (NAMED[v]) {
+    const [r, g, b] = NAMED[v];
+    return { r, g, b, alpha: 1 };
+  }
+
+  return null; // unrecognised → fall back to transparent
+}
+
+/**
  * GET /api/generate-icon
  *
  * Query parameters:
- *   - library  : Icon library slug (e.g. 'lucide', 'fa', 'fi'). Default: 'lucide'
- *   - iconName : Exact exported name of the icon (e.g. 'Camera', 'FaBeer'). Default: 'Star'
- *   - size     : Output image size in pixels. Default: 256
- *   - color    : Hex color for the icon. Default: '#000000'
- *   - format   : Output image format — 'png' | 'ico' | 'jpeg' | 'webp'. Default: 'png'
+ *   - library    : Icon library slug (e.g. 'lucide', 'fa', 'fi'). Default: 'lucide'
+ *   - iconName   : Exact exported name of the icon (e.g. 'Camera', 'FaBeer'). Default: 'Star'
+ *   - size       : Output image size in pixels. Default: 256
+ *   - color      : Hex color for the icon stroke/fill. Default: '#000000'
+ *   - format     : Output image format — 'png' | 'ico' | 'jpeg' | 'webp' | 'svg'. Default: 'png'
+ *   - background : Background color (hex, rgb(), named color, or 'transparent'). Default: 'transparent'
  *
  * Returns an image buffer with the appropriate Content-Type, or a JSON error
  * with HTTP 400/404/500 on failure.
+ *
+ * CORS headers are included on every response so this endpoint can be called
+ * directly from any origin (browser, server, scripts, etc.).
  */
+
+/** Handles preflight CORS requests from browsers. */
+export function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
@@ -115,11 +191,15 @@ export async function GET(request: NextRequest) {
   const size = Math.min(Math.max(parseInt(searchParams.get("size") || "256", 10), 16), 1024);
   const color = searchParams.get("color") || "#000000";
 
+  // `background` defaults to transparent; callers can pass any CSS color or "transparent"
+  const bgParam = searchParams.get("background") ?? "transparent";
+  const bgColor = parseBackground(bgParam);
+
   const rawFormat = (searchParams.get("format") || "png").toLowerCase();
   if (!SUPPORTED_FORMATS.includes(rawFormat as OutputFormat)) {
     return NextResponse.json(
       { error: `Unsupported format "${rawFormat}". Supported formats: ${SUPPORTED_FORMATS.join(", ")}` },
-      { status: 400 }
+      { status: 400, headers: CORS_HEADERS }
     );
   }
   const format = rawFormat as OutputFormat;
@@ -130,7 +210,7 @@ export async function GET(request: NextRequest) {
   if (!IconComponent) {
     return NextResponse.json(
       { error: `Icon "${iconName}" not found in library "${library}"` },
-      { status: 404 }
+      { status: 404, headers: CORS_HEADERS }
     );
   }
 
@@ -152,7 +232,7 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { error: `Failed to render icon "${iconName}"` },
-      { status: 500 }
+      { status: 500, headers: CORS_HEADERS }
     );
   }
 
@@ -177,24 +257,43 @@ export async function GET(request: NextRequest) {
     return new NextResponse(svgString as unknown as BodyInit, {
       status: 200,
       headers: {
+        ...CORS_HEADERS,
         "Content-Type": "image/svg+xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
       },
     });
   }
 
-  // Convert SVG buffer to PNG using sharp
+  // Convert SVG to a transparent PNG first; then apply background / format conversion.
+  // ensureAlpha() guarantees the output PNG has an alpha channel even when sharp's
+  // SVG renderer does not emit one by default.
   let pngBuffer: Buffer;
   try {
     pngBuffer = await sharp(Buffer.from(svgString), { density: 300 })
       .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .ensureAlpha()
       .png()
       .toBuffer();
   } catch {
     return NextResponse.json(
       { error: "Failed to convert SVG to PNG" },
-      { status: 500 }
+      { status: 500, headers: CORS_HEADERS }
     );
+  }
+
+  // Composite a solid background behind the icon when the caller requested one.
+  if (bgColor) {
+    pngBuffer = await sharp({
+      create: {
+        width: size,
+        height: size,
+        channels: 4,
+        background: bgColor,
+      },
+    })
+      .composite([{ input: pngBuffer, blend: "over" }])
+      .png()
+      .toBuffer();
   }
 
   // For ICO, wrap the PNG buffer in a minimal ICO container.
@@ -210,6 +309,7 @@ export async function GET(request: NextRequest) {
       if (icoSize !== size) {
         pngBuffer = await sharp(pngBuffer)
           .resize(icoSize, icoSize, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .ensureAlpha()
           .png()
           .toBuffer();
       }
@@ -218,18 +318,27 @@ export async function GET(request: NextRequest) {
       break;
     }
 
-    case "jpeg":
-      imageBuffer = await sharp(pngBuffer)
-        .flatten({ background: { r: 255, g: 255, b: 255 } }) // fill transparent areas with white
+    case "jpeg": {
+      // JPEG does not support transparency; composite over caller's background or white.
+      const jpegBg = bgColor ?? { r: 255, g: 255, b: 255, alpha: 1 };
+      imageBuffer = await sharp({
+        create: {
+          width: size,
+          height: size,
+          channels: 4,
+          background: jpegBg,
+        },
+      })
+        .composite([{ input: pngBuffer, blend: "over" }])
         .jpeg({ quality: 95 })
         .toBuffer();
       contentType = "image/jpeg";
       break;
+    }
 
     case "webp":
-      imageBuffer = await sharp(pngBuffer)
-        .webp({ quality: 95 })
-        .toBuffer();
+      // WebP supports transparency; if a background was requested it was already applied above.
+      imageBuffer = await sharp(pngBuffer).webp({ quality: 95 }).toBuffer();
       contentType = "image/webp";
       break;
 
@@ -242,6 +351,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(imageBuffer as unknown as BodyInit, {
     status: 200,
     headers: {
+      ...CORS_HEADERS,
       "Content-Type": contentType,
       "Cache-Control": "public, max-age=3600",
     },

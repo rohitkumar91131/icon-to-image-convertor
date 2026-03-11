@@ -30,7 +30,8 @@ function buildApiUrl(
   iconName: string,
   size: number,
   color: string,
-  format: string
+  format: string,
+  background: string
 ): string {
   const params = new URLSearchParams({
     library,
@@ -38,6 +39,7 @@ function buildApiUrl(
     size: String(size),
     color,
     format,
+    background,
   });
   return `/api/generate-icon?${params}`;
 }
@@ -48,6 +50,7 @@ export default function HomeEditor() {
   const [color, setColor] = useState("#a78bfa");
   const [size, setSize] = useState(128);
   const [format, setFormat] = useState<FormatValue>("png");
+  const [background, setBackground] = useState("transparent");
   const [previewKey, setPreviewKey] = useState(0);
   const [previewError, setPreviewError] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -66,15 +69,15 @@ export default function HomeEditor() {
   useEffect(() => {
     setPreviewError(false);
     setPreviewKey((k) => k + 1);
-  }, [color, size, format, iconName]);
+  }, [color, size, format, iconName, background]);
 
-  const previewUrl = buildApiUrl(library, iconName, size, color, format === "svg" ? "png" : format);
+  const previewUrl = buildApiUrl(library, iconName, size, color, format === "svg" ? "png" : format, background);
 
   const handleDownload = useCallback(async () => {
     if (!iconName.trim()) return;
     setDownloading(true);
     const ext = FORMATS.find((f) => f.value === format)?.ext ?? "png";
-    const url = buildApiUrl(library, iconName, size, color, format);
+    const url = buildApiUrl(library, iconName, size, color, format, background);
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error();
@@ -92,16 +95,16 @@ export default function HomeEditor() {
     } finally {
       setDownloading(false);
     }
-  }, [library, iconName, size, color, format]);
+  }, [library, iconName, size, color, format, background]);
 
   const copyApiUrl = useCallback(async () => {
-    const url = buildApiUrl(library, iconName, size, color, "png");
+    const url = buildApiUrl(library, iconName, size, color, format, background);
     try {
       await navigator.clipboard.writeText(`${window.location.origin}${url}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch { /* ignore */ }
-  }, [library, iconName, size, color]);
+  }, [library, iconName, size, color, format, background]);
 
   return (
     <div
@@ -304,6 +307,77 @@ export default function HomeEditor() {
                 onChange={(e) => {
                   const v = e.target.value;
                   if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setColor(v);
+                }}
+                style={{
+                  flex: 1,
+                  height: "28px",
+                  borderRadius: "6px",
+                  border: "1px solid var(--border)",
+                  background: "var(--surface-raised)",
+                  color: "#fff",
+                  fontSize: "12px",
+                  padding: "0 8px",
+                  fontFamily: "monospace",
+                  outline: "none",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Background */}
+          <div>
+            <label
+              style={{
+                fontSize: "12px",
+                fontWeight: 500,
+                color: "var(--foreground-secondary)",
+                display: "block",
+                marginBottom: "6px",
+              }}
+            >
+              Background
+            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button
+                onClick={() => setBackground("transparent")}
+                title="Transparent"
+                style={{
+                  width: "36px",
+                  height: "28px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  border: background === "transparent"
+                    ? "2px solid #818cf8"
+                    : "1px solid var(--border)",
+                  padding: 0,
+                  overflow: "hidden",
+                  flexShrink: 0,
+                  background:
+                    "repeating-conic-gradient(#555 0% 25%, #222 0% 50%) 0 0 / 10px 10px",
+                }}
+              />
+              <input
+                type="color"
+                value={background === "transparent" ? "#ffffff" : background}
+                onChange={(e) => setBackground(e.target.value)}
+                style={{
+                  width: "36px",
+                  height: "28px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  border: background !== "transparent"
+                    ? "2px solid #818cf8"
+                    : "1px solid var(--border)",
+                  background: "transparent",
+                  padding: "2px",
+                }}
+              />
+              <input
+                type="text"
+                value={background}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "transparent" || /^#[0-9a-fA-F]{0,6}$/.test(v)) setBackground(v);
                 }}
                 style={{
                   flex: 1,

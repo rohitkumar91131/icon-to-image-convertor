@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/tb", label: "Tabler" },
   { href: "/fa", label: "Font Awesome" },
   { href: "/md", label: "Material" },
+  { href: "/api-docs", label: "API Docs" },
 ];
 
 export default function Nav() {
