@@ -4,11 +4,43 @@ import HomeEditor from "@/components/home-editor";
 import GsapAnimations from "@/components/gsap-animations";
 import { LIBRARIES, LIBRARY_SLUGS } from "@/lib/libraries";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://iconimg.vercel.app";
+
+function buildJsonLd() {
+  const libraryCount = LIBRARY_SLUGS.length;
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Icon → Image Converter",
+    url: siteUrl,
+    description:
+      "Convert any icon from Lucide, Tabler, Font Awesome, Material Design and more into a perfect PNG, SVG, WebP or ICO image. Customize color, size, stroke, padding and export instantly.",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "All",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    featureList: [
+      "Convert icons to PNG, SVG, WebP, and ICO formats",
+      "Customize icon color, size, stroke, and padding",
+      `Support for ${libraryCount} icon libraries including ${LIBRARY_SLUGS.map((s) => LIBRARIES[s].name).join(", ")}`,
+      "One-click React component code copy",
+      "Direct API access for icon generation",
+    ],
+  };
+}
+
 export default function HomePage() {
   const libraries = LIBRARY_SLUGS.map((slug) => LIBRARIES[slug]);
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd()) }}
+      />
       <Nav />
       <GsapAnimations />
       <main style={{ paddingTop: "60px" }}>
