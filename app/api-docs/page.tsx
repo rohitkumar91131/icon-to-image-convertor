@@ -146,7 +146,7 @@ export default function ApiDocsPage() {
 
           {/* Endpoint */}
           <Section title="Endpoint">
-            <CodeBlock>{`GET /api/generate-icon`}</CodeBlock>
+            <CodeBlock>{`GET https://icon-to-image-convertor.vercel.app/api/generate-icon`}</CodeBlock>
             <p
               style={{
                 fontSize: "14px",
@@ -347,7 +347,7 @@ export default function ApiDocsPage() {
             >
               JavaScript / Fetch
             </h3>
-            <CodeBlock>{`const url = new URL("https://your-domain.com/api/generate-icon");
+            <CodeBlock>{`const url = new URL("https://icon-to-image-convertor.vercel.app/api/generate-icon");
 url.searchParams.set("library", "lucide");
 url.searchParams.set("iconName", "Star");
 url.searchParams.set("size", "256");
@@ -392,7 +392,7 @@ const objectUrl = URL.createObjectURL(blob);
               cURL
             </h3>
             <CodeBlock>{`curl -o star.png \\
-  "https://your-domain.com/api/generate-icon?library=lucide&iconName=Star&size=256&color=%23a78bfa&format=png"`}</CodeBlock>
+  "https://icon-to-image-convertor.vercel.app/api/generate-icon?library=lucide&iconName=Star&size=256&color=%23a78bfa&format=png"`}</CodeBlock>
 
             <h3
               style={{
@@ -417,7 +417,7 @@ params = {
     "background": "transparent",
 }
 
-response = requests.get("https://your-domain.com/api/generate-icon", params=params)
+response = requests.get("https://icon-to-image-convertor.vercel.app/api/generate-icon", params=params)
 with open("star.png", "wb") as f:
     f.write(response.content)`}</CodeBlock>
           </Section>
