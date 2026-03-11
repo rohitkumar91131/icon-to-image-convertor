@@ -1,11 +1,27 @@
 "use client";
 
-import { use, useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { Component, use, useState, useEffect, useMemo, useCallback, useRef } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/nav";
 import { LIBRARIES, isValidLibrary } from "@/lib/libraries";
 import { CATEGORIES, categorizeIcon } from "@/lib/categories";
+
+/** Catches render errors in a single icon card so one bad component can't crash the whole grid. */
+class IconErrorBoundary extends Component<{ children: ReactNode }, { error: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { error: false };
+  }
+  static getDerivedStateFromError() {
+    return { error: true };
+  }
+  render() {
+    if (this.state.error) return null;
+    return this.props.children;
+  }
+}
 
 const PAGE_SIZE = 96;
 
@@ -38,7 +54,9 @@ async function importLibrary(slug: string): Promise<Record<string, IconComponent
   // lucide-react exports forwardRef objects (typeof === "object")
   // react-icons exports plain functions (typeof === "function")
   // Both have PascalCase names.
-  const EXCLUDED = new Set(["Fragment", "StrictMode", "Suspense", "Children", "Component"]);
+  // "Icon" is a lucide-react utility component that requires an `iconNode` prop;
+  // rendering it without that prop throws at runtime.
+  const EXCLUDED = new Set(["Fragment", "StrictMode", "Suspense", "Children", "Component", "Icon"]);
   const result: Record<string, IconComponent> = {};
   for (const [key, val] of Object.entries(mod)) {
     if (!val || EXCLUDED.has(key) || !/^[A-Z]/.test(key)) continue;
@@ -426,7 +444,8 @@ export default function PackagePage({
                   const IconComp = iconComponents[name];
                   const isFav = favorites.has(name);
                   return (
-                    <div key={name} style={{ position: "relative" }}>
+                    <IconErrorBoundary key={name}>
+                    <div style={{ position: "relative" }}>
                       <Link
                         href={`/${slug}/${name}`}
                         style={{ textDecoration: "none" }}
@@ -497,6 +516,7 @@ export default function PackagePage({
                         {isFav ? "❤️" : "🤍"}
                       </button>
                     </div>
+                    </IconErrorBoundary>
                   );
                 })}
               </div>

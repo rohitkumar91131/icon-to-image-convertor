@@ -19,7 +19,9 @@ async function loadIconNames(slug: string): Promise<string[] | null> {
       case "tb":     mod = await import("react-icons/tb"); break;
       default: return null;
     }
-    const EXCLUDED = new Set(["Fragment", "StrictMode", "Suspense", "Children", "Component"]);
+    // "Icon" is a lucide-react utility component that requires an `iconNode` prop;
+    // rendering it without that prop throws at runtime.
+    const EXCLUDED = new Set(["Fragment", "StrictMode", "Suspense", "Children", "Component", "Icon"]);
     return Object.entries(mod)
       .filter(([key, val]) => {
         if (!val || EXCLUDED.has(key) || !/^[A-Z]/.test(key)) return false;
