@@ -156,7 +156,7 @@ export default function IconEditorPage({
 
   const copyHtml = useCallback(() => {
     const url = buildApiUrl(slug, iconname, size, color, "png");
-    copyText(buildHtmlSnippet(url), "HTML");
+    copyText(buildHtmlSnippet(`${window.location.origin}${url}`), "HTML");
   }, [slug, iconname, size, color]);
 
   const copyApiUrl = useCallback(() => {
