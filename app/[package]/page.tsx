@@ -165,13 +165,7 @@ export default function PackagePage({
             background: "var(--surface)",
           }}
         >
-          <div
-            style={{
-              maxWidth: "1200px",
-              margin: "0 auto",
-              padding: "40px 24px 32px",
-            }}
-          >
+          <div className="pack-header-inner">
             <Link
               href="/"
               style={{
@@ -187,39 +181,54 @@ export default function PackagePage({
               ← All packs
             </Link>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
+            <div className="pack-header-row" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
               <div
                 style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "14px",
-                  background: `linear-gradient(135deg, ${library.gradientFrom}22, ${library.gradientTo}22)`,
-                  border: `1px solid ${library.gradientFrom}44`,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "24px",
-                  flexShrink: 0,
+                  gap: "16px",
+                  flex: 1,
+                  minWidth: 0,
                 }}
               >
-                {library.emoji}
-              </div>
-              <div style={{ flex: 1 }}>
-                <h1
+                <div
                   style={{
-                    fontSize: "28px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.02em",
-                    margin: "0 0 4px",
+                    width: "56px",
+                    height: "56px",
+                    borderRadius: "14px",
+                    background: `linear-gradient(135deg, ${library.gradientFrom}22, ${library.gradientTo}22)`,
+                    border: `1px solid ${library.gradientFrom}44`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "24px",
+                    flexShrink: 0,
                   }}
                 >
-                  {library.name}
-                </h1>
-                <p style={{ fontSize: "14px", color: "var(--foreground-secondary)", margin: 0 }}>
-                  {library.description}
-                </p>
+                  {library.emoji}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <h1
+                    className="pack-header-title"
+                    title={library.name}
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      letterSpacing: "-0.02em",
+                      margin: "0 0 4px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {library.name}
+                  </h1>
+                  <p style={{ fontSize: "14px", color: "var(--foreground-secondary)", margin: 0 }}>
+                    {library.description}
+                  </p>
+                </div>
               </div>
-              <div style={{ display: "flex", gap: "32px", flexShrink: 0 }}>
+              <div className="pack-header-stats" style={{ display: "flex", gap: "32px", flexShrink: 0 }}>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontSize: "22px", fontWeight: 700, letterSpacing: "-0.02em" }}>
                     {loading ? "…" : allIcons.length.toLocaleString()}
@@ -355,6 +364,7 @@ export default function PackagePage({
 
         {/* ── Icon grid ─────────────────────────────────────────────────── */}
         <div
+          className="icon-grid-container"
           style={{
             maxWidth: "1200px",
             margin: "0 auto",
@@ -362,13 +372,7 @@ export default function PackagePage({
           }}
         >
           {loading ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                gap: "8px",
-              }}
-            >
+            <div className="icon-grid">
               {Array.from({ length: 48 }).map((_, i) => (
                 <div
                   key={i}
@@ -415,13 +419,7 @@ export default function PackagePage({
                 {search && ` matching "${search}"`}
               </p>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                  gap: "8px",
-                }}
-              >
+              <div className="icon-grid">
                 {visibleIcons.map(({ name }) => {
                   const IconComp = iconComponents[name];
                   const isFav = favorites.has(name);
