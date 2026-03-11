@@ -18,12 +18,12 @@ const SAMPLE_ICONS: Record<string, string> = {
   tb: "TbStar",
   md: "MdFavorite",
   si: "SiGithub",
-  gi: "GiDragon",
+  gi: "GiDragonHead",
   ri: "RiHeartLine",
   fa: "FaStar",
   bs: "BsHeart",
   fi: "FiHome",
-  io: "IoStar",
+  io: "IoIosStar",
 };
 
 function buildApiUrl(
