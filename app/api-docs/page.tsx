@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import Nav from "@/components/nav";
 
 export const metadata: Metadata = {
@@ -82,7 +83,11 @@ const EXAMPLES = [
   },
 ];
 
-export default function ApiDocsPage() {
+export default async function ApiDocsPage() {
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "localhost:3000";
+  const proto = headersList.get("x-forwarded-proto") ?? "http";
+  const baseUrl = `${proto}://${host}`;
   return (
     <>
       <Nav />
@@ -108,17 +113,26 @@ export default function ApiDocsPage() {
             >
               Developer Reference
             </p>
-            <h1
-              style={{
-                fontSize: "clamp(28px, 5vw, 48px)",
-                fontWeight: 800,
-                letterSpacing: "-0.04em",
-                lineHeight: 1.1,
-                margin: "0 0 16px",
-              }}
-            >
-              Icon API
-            </h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/api/generate-icon?library=lucide&iconName=BrainIcon&size=256&color=%23818cf8&format=png"
+                alt="Brain icon representing the Icon API"
+                width={64}
+                height={64}
+              />
+              <h1
+                style={{
+                  fontSize: "clamp(28px, 5vw, 48px)",
+                  fontWeight: 800,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1.1,
+                  margin: 0,
+                }}
+              >
+                Icon API
+              </h1>
+            </div>
             <p
               style={{
                 fontSize: "16px",
@@ -146,7 +160,7 @@ export default function ApiDocsPage() {
 
           {/* Endpoint */}
           <Section title="Endpoint">
-            <CodeBlock>{`GET /api/generate-icon`}</CodeBlock>
+            <CodeBlock>{`GET ${baseUrl}/api/generate-icon`}</CodeBlock>
             <p
               style={{
                 fontSize: "14px",
@@ -347,7 +361,7 @@ export default function ApiDocsPage() {
             >
               JavaScript / Fetch
             </h3>
-            <CodeBlock>{`const url = new URL("https://your-domain.com/api/generate-icon");
+            <CodeBlock>{`const url = new URL(\`${baseUrl}/api/generate-icon\`);
 url.searchParams.set("library", "lucide");
 url.searchParams.set("iconName", "Star");
 url.searchParams.set("size", "256");
@@ -373,7 +387,7 @@ const objectUrl = URL.createObjectURL(blob);
               HTML — Embed directly
             </h3>
             <CodeBlock>{`<img
-  src="/api/generate-icon?library=lucide&iconName=Star&size=64&color=%23a78bfa&format=png"
+  src="${baseUrl}/api/generate-icon?library=lucide&iconName=Star&size=64&color=%23a78bfa&format=png"
   alt="Star icon"
   width="64"
   height="64"
@@ -392,7 +406,7 @@ const objectUrl = URL.createObjectURL(blob);
               cURL
             </h3>
             <CodeBlock>{`curl -o star.png \\
-  "https://your-domain.com/api/generate-icon?library=lucide&iconName=Star&size=256&color=%23a78bfa&format=png"`}</CodeBlock>
+  "${baseUrl}/api/generate-icon?library=lucide&iconName=Star&size=256&color=%23a78bfa&format=png"`}</CodeBlock>
 
             <h3
               style={{
@@ -417,7 +431,7 @@ params = {
     "background": "transparent",
 }
 
-response = requests.get("https://your-domain.com/api/generate-icon", params=params)
+response = requests.get("${baseUrl}/api/generate-icon", params=params)
 with open("star.png", "wb") as f:
     f.write(response.content)`}</CodeBlock>
           </Section>
