@@ -134,12 +134,57 @@ export default function GsapAnimations() {
       return { card, enter, leave };
     });
 
+    // ── CTA buttons: replay section animations on every click ─────────────
+    // Delay (ms) to allow CSS smooth-scroll to finish before re-animating
+    const SCROLL_ANIMATION_DELAY = 500;
+
+    const heroCtas = document.querySelector<HTMLElement>(".hero-ctas");
+    const editorCta = heroCtas?.querySelector<HTMLElement>('a[href="#editor"]') ?? null;
+    const packsCta = heroCtas?.querySelector<HTMLElement>('a[href="#packs"]') ?? null;
+
+    const animateBtnPress = (btn: HTMLElement) => {
+      gsap.fromTo(btn, { scale: 0.95 }, { scale: 1, duration: 0.35, ease: "back.out(2)" });
+    };
+
+    // After smooth-scroll completes, re-run the editor panel entrance animation
+    const handleEditorCtaClick = () => {
+      if (editorCta) animateBtnPress(editorCta);
+      setTimeout(() => {
+        const panel = document.querySelector<HTMLElement>(".gsap-editor-panel");
+        if (panel) {
+          gsap.fromTo(panel, { opacity: 0, y: 48 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" });
+        }
+      }, SCROLL_ANIMATION_DELAY);
+    };
+
+    // After smooth-scroll completes, re-run the packs section entrance animations
+    const handlePacksCtaClick = () => {
+      if (packsCta) animateBtnPress(packsCta);
+      setTimeout(() => {
+        const reveal = document.querySelector<Element>("#packs .gsap-reveal");
+        const staggerChildren = Array.from(
+          document.querySelectorAll<Element>("#packs .gsap-stagger-child")
+        );
+        if (reveal) {
+          gsap.fromTo(reveal, { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.85, ease: "power3.out" });
+        }
+        if (staggerChildren.length) {
+          gsap.fromTo(staggerChildren, { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 0.75, ease: "power3.out", stagger: 0.06, delay: 0.1 });
+        }
+      }, SCROLL_ANIMATION_DELAY);
+    };
+
+    editorCta?.addEventListener("click", handleEditorCtaClick);
+    packsCta?.addEventListener("click", handlePacksCtaClick);
+
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
       cardListeners.forEach(({ card, enter, leave }) => {
         card.removeEventListener("mouseenter", enter);
         card.removeEventListener("mouseleave", leave);
       });
+      editorCta?.removeEventListener("click", handleEditorCtaClick);
+      packsCta?.removeEventListener("click", handlePacksCtaClick);
     };
   }, []);
 
