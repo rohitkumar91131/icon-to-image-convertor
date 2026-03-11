@@ -17,18 +17,29 @@ const LIBRARIES = [
   { value: "tb", label: "Tabler Icons (tb)" },
 ] as const;
 
+/** Supported output formats shown in the dropdown. */
+const FORMATS = [
+  { value: "png",  label: "PNG  (.png)",  ext: "png"  },
+  { value: "ico",  label: "ICO  (.ico)",  ext: "ico"  },
+  { value: "jpeg", label: "JPEG (.jpg)",  ext: "jpg"  },
+  { value: "webp", label: "WebP (.webp)", ext: "webp" },
+] as const;
+type FormatValue = (typeof FORMATS)[number]["value"];
+
 /** Build the API URL from the current form state. */
 function buildApiUrl(
   library: string,
   iconName: string,
   size: number,
-  color: string
+  color: string,
+  format: FormatValue
 ): string {
   const params = new URLSearchParams({
     library,
     iconName,
     size: String(size),
     color,
+    format,
   });
   return `/api/generate-icon?${params.toString()}`;
 }
@@ -39,10 +50,11 @@ export default function Home() {
   const [iconName, setIconName] = useState<string>("Star");
   const [size, setSize] = useState<number>(256);
   const [color, setColor] = useState<string>("#000000");
+  const [format, setFormat] = useState<FormatValue>("png");
 
   // Preview state
   const [previewUrl, setPreviewUrl] = useState<string>(
-    buildApiUrl("lucide", "Star", 256, "#000000")
+    buildApiUrl("lucide", "Star", 256, "#000000", "png")
   );
   const [previewError, setPreviewError] = useState<boolean>(false);
   const [downloading, setDownloading] = useState<boolean>(false);
@@ -51,15 +63,16 @@ export default function Home() {
   const handleGenerate = useCallback(() => {
     if (!iconName.trim()) return;
     setPreviewError(false);
-    setPreviewUrl(buildApiUrl(library, iconName.trim(), size, color));
-  }, [library, iconName, size, color]);
+    setPreviewUrl(buildApiUrl(library, iconName.trim(), size, color, format));
+  }, [library, iconName, size, color, format]);
 
-  /** Downloads the current preview as icon.png via a programmatic fetch. */
+  /** Downloads the current image as <iconName>.<ext> via a programmatic fetch. */
   const handleDownload = useCallback(async () => {
     if (!iconName.trim()) return;
     setDownloading(true);
+    const ext = FORMATS.find((f) => f.value === format)?.ext ?? "png";
     try {
-      const url = buildApiUrl(library, iconName.trim(), size, color);
+      const url = buildApiUrl(library, iconName.trim(), size, color, format);
       const response = await fetch(url);
       if (!response.ok) throw new Error("Icon not found");
 
@@ -68,7 +81,7 @@ export default function Home() {
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = objectUrl;
-      anchor.download = `${iconName}.png`;
+      anchor.download = `${iconName}.${ext}`;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -78,7 +91,7 @@ export default function Home() {
     } finally {
       setDownloading(false);
     }
-  }, [library, iconName, size, color]);
+  }, [library, iconName, size, color, format]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-6">
@@ -90,7 +103,7 @@ export default function Home() {
           </h1>
           <p className="text-slate-500 text-sm">
             Pick an icon from any popular React icon library and download it as a
-            high-quality PNG.
+            high-quality PNG, ICO, JPEG, or WebP image.
           </p>
         </div>
 
@@ -165,6 +178,25 @@ export default function Home() {
               className="h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
           </div>
+
+          {/* Output format selector */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-slate-700" htmlFor="format">
+              Output Format
+            </label>
+            <select
+              id="format"
+              value={format}
+              onChange={(e) => setFormat(e.target.value as FormatValue)}
+              className="h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+            >
+              {FORMATS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Generate button */}
@@ -223,7 +255,7 @@ export default function Home() {
               : "bg-emerald-600 text-white hover:bg-emerald-500 active:scale-[0.98]"
           )}
         >
-          {downloading ? "Downloading…" : "⬇ Download Image"}
+          {downloading ? "Downloading…" : `⬇ Download as .${FORMATS.find((f) => f.value === format)?.ext ?? "png"}`}
         </button>
       </main>
     </div>

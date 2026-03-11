@@ -7,6 +7,39 @@ import sharp from "sharp";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { renderToStaticMarkup } = require("react-dom/server") as typeof import("react-dom/server");
 
+/** Supported output formats. */
+const SUPPORTED_FORMATS = ["png", "ico", "jpeg", "webp"] as const;
+type OutputFormat = (typeof SUPPORTED_FORMATS)[number];
+
+/**
+ * Wraps a PNG buffer in a minimal ICO container so the result can be saved
+ * as a .ico file.  Modern ICO files support embedded PNG data for images
+ * up to 256 × 256 px (a width/height byte value of 0 represents 256).
+ */
+function buildIcoFromPng(pngBuffer: Buffer, size: number): Buffer {
+  // ICO dimensions are capped at 256; use 0 to represent 256 in the header.
+  const dim = size >= 256 ? 0 : size;
+
+  // 6-byte ICONDIR header
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0); // reserved
+  header.writeUInt16LE(1, 2); // type = ICO
+  header.writeUInt16LE(1, 4); // image count = 1
+
+  // 16-byte ICONDIRENTRY
+  const entry = Buffer.alloc(16);
+  entry.writeUInt8(dim, 0);              // width  (0 → 256)
+  entry.writeUInt8(dim, 1);              // height (0 → 256)
+  entry.writeUInt8(0, 2);               // color palette size (0 = no palette)
+  entry.writeUInt8(0, 3);               // reserved
+  entry.writeUInt16LE(1, 4);            // colour planes
+  entry.writeUInt16LE(32, 6);           // bits per pixel
+  entry.writeUInt32LE(pngBuffer.length, 8);  // image data size in bytes
+  entry.writeUInt32LE(22, 12);          // offset to image data (6 + 16)
+
+  return Buffer.concat([header, entry, pngBuffer]);
+}
+
 /**
  * Dynamically resolves an icon component from the requested library.
  * Supports: lucide, fa, fi, md, bs, io, gi, ri, si, tb
@@ -67,10 +100,12 @@ async function resolveIcon(
  * Query parameters:
  *   - library  : Icon library slug (e.g. 'lucide', 'fa', 'fi'). Default: 'lucide'
  *   - iconName : Exact exported name of the icon (e.g. 'Camera', 'FaBeer'). Default: 'Star'
- *   - size     : Output PNG size in pixels. Default: 256
+ *   - size     : Output image size in pixels. Default: 256
  *   - color    : Hex color for the icon. Default: '#000000'
+ *   - format   : Output image format — 'png' | 'ico' | 'jpeg' | 'webp'. Default: 'png'
  *
- * Returns a PNG image buffer with Content-Type: image/png.
+ * Returns an image buffer with the appropriate Content-Type, or a JSON error
+ * with HTTP 400/404/500 on failure.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -79,6 +114,15 @@ export async function GET(request: NextRequest) {
   const iconName = searchParams.get("iconName") || "Star";
   const size = Math.min(Math.max(parseInt(searchParams.get("size") || "256", 10), 16), 1024);
   const color = searchParams.get("color") || "#000000";
+
+  const rawFormat = (searchParams.get("format") || "png").toLowerCase();
+  if (!SUPPORTED_FORMATS.includes(rawFormat as OutputFormat)) {
+    return NextResponse.json(
+      { error: `Unsupported format "${rawFormat}". Supported formats: ${SUPPORTED_FORMATS.join(", ")}` },
+      { status: 400 }
+    );
+  }
+  const format = rawFormat as OutputFormat;
 
   // Resolve the icon component dynamically
   const IconComponent = await resolveIcon(library, iconName);
@@ -141,10 +185,52 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return new NextResponse(pngBuffer as unknown as BodyInit, {
+  // For ICO, wrap the PNG buffer in a minimal ICO container.
+  // For JPEG/WebP, re-process the PNG through sharp with a white background
+  // (these formats don't support transparency).
+  let imageBuffer: Buffer;
+  let contentType: string;
+
+  switch (format) {
+    case "ico": {
+      // ICO spec supports up to 256 × 256; clamp and produce a square PNG first.
+      const icoSize = Math.min(size, 256);
+      if (icoSize !== size) {
+        pngBuffer = await sharp(pngBuffer)
+          .resize(icoSize, icoSize, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .png()
+          .toBuffer();
+      }
+      imageBuffer = buildIcoFromPng(pngBuffer, icoSize);
+      contentType = "image/x-icon";
+      break;
+    }
+
+    case "jpeg":
+      imageBuffer = await sharp(pngBuffer)
+        .flatten({ background: { r: 255, g: 255, b: 255 } }) // fill transparent areas with white
+        .jpeg({ quality: 95 })
+        .toBuffer();
+      contentType = "image/jpeg";
+      break;
+
+    case "webp":
+      imageBuffer = await sharp(pngBuffer)
+        .webp({ quality: 95 })
+        .toBuffer();
+      contentType = "image/webp";
+      break;
+
+    default: // "png"
+      imageBuffer = pngBuffer;
+      contentType = "image/png";
+      break;
+  }
+
+  return new NextResponse(imageBuffer as unknown as BodyInit, {
     status: 200,
     headers: {
-      "Content-Type": "image/png",
+      "Content-Type": contentType,
       "Cache-Control": "public, max-age=3600",
     },
   });
