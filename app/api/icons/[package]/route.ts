@@ -19,6 +19,14 @@ async function loadIconNames(slug: string): Promise<string[] | null> {
       case "tb":     mod = await import("react-icons/tb"); break;
       default: return null;
     }
+
+    // lucide-react exports both canonical names (e.g. "Star") and Icon-suffixed
+    // aliases (e.g. "StarIcon") that point to the same component.  Use the
+    // library's own `icons` registry to get only the canonical names.
+    if (slug === "lucide" && mod.icons && typeof mod.icons === "object") {
+      return Object.keys(mod.icons as Record<string, unknown>).sort();
+    }
+
     // "Icon" is a lucide-react utility component that requires an `iconNode` prop;
     // rendering it without that prop throws at runtime.
     const EXCLUDED = new Set(["Fragment", "StrictMode", "Suspense", "Children", "Component", "Icon"]);
