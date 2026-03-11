@@ -50,6 +50,19 @@ async function importLibrary(slug: string): Promise<Record<string, IconComponent
   } catch {
     return {};
   }
+
+  // lucide-react exports both canonical names (e.g. "Star") and Icon-suffixed
+  // aliases (e.g. "StarIcon") that point to the same component.  Use the
+  // library's own `icons` registry to get only the canonical names.
+  if (slug === "lucide" && mod.icons && typeof mod.icons === "object") {
+    const result: Record<string, IconComponent> = {};
+    for (const key of Object.keys(mod.icons as Record<string, unknown>)) {
+      const val = mod[key];
+      if (val) result[key] = val as IconComponent;
+    }
+    return result;
+  }
+
   // Filter to exported icon components only.
   // lucide-react exports forwardRef objects (typeof === "object")
   // react-icons exports plain functions (typeof === "function")

@@ -33,7 +33,7 @@ export const LIBRARIES: Record<string, LibraryMeta> = {
     color: "#f97316",
     gradientFrom: "#f97316",
     gradientTo: "#ea580c",
-    approxCount: "1,000+",
+    approxCount: "1,700+",
     homepage: "https://lucide.dev",
     pkg: "lucide-react",
     sampleIcons: ["Star", "Heart", "Home", "Search", "Settings"],
