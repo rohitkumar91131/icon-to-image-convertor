@@ -106,7 +106,7 @@ export const LIBRARIES: Record<string, LibraryMeta> = {
     approxCount: "1,300+",
     homepage: "https://ionic.io/ionicons",
     pkg: "react-icons/io",
-    sampleIcons: ["IoStar", "IoHeart", "IoHome", "IoSearch", "IoSettings"],
+    sampleIcons: ["IoIosStar", "IoIosHeart", "IoIosHome", "IoIosSearch", "IoIosSettings"],
     emoji: "⚡",
   },
   gi: {
@@ -120,7 +120,7 @@ export const LIBRARIES: Record<string, LibraryMeta> = {
     approxCount: "4,000+",
     homepage: "https://game-icons.net",
     pkg: "react-icons/gi",
-    sampleIcons: ["GiSword", "GiShield", "GiCastle", "GiDragon", "GiTreasureMap"],
+    sampleIcons: ["GiBroadsword", "GiShield", "GiCastle", "GiDragonHead", "GiTreasureMap"],
     emoji: "🎮",
   },
   ri: {
