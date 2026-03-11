@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import gsap from "gsap";
 import { LIBRARIES, LIBRARY_SLUGS } from "@/lib/libraries";
 
 const FORMATS = [
@@ -55,8 +56,19 @@ export default function HomeEditor() {
   const [previewError, setPreviewError] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   const lib = LIBRARIES[library];
+
+  // GSAP entrance animation for the editor panel
+  useEffect(() => {
+    if (!editorRef.current) return;
+    gsap.fromTo(
+      editorRef.current,
+      { opacity: 0, y: 48 },
+      { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", delay: 0.15 }
+    );
+  }, []);
 
   // When library changes, reset icon name to a known sample
   useEffect(() => {
@@ -108,6 +120,7 @@ export default function HomeEditor() {
 
   return (
     <div
+      ref={editorRef}
       style={{
         border: "1px solid var(--border)",
         borderRadius: "16px",
