@@ -285,6 +285,10 @@ input[type="range"]::-moz-range-thumb {
     gap: 24px;
   }
 
+  .pack-description {
+    display: none;
+  }
+
   .footer-inner {
     flex-direction: column;
     align-items: flex-start !important;
