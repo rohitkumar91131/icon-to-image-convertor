@@ -215,7 +215,7 @@ export default function PackagePage({
                 >
                   {library.name}
                 </h1>
-                <p style={{ fontSize: "14px", color: "var(--foreground-secondary)", margin: 0 }}>
+                <p className="pack-description" style={{ fontSize: "14px", color: "var(--foreground-secondary)", margin: 0 }}>
                   {library.description}
                 </p>
               </div>
