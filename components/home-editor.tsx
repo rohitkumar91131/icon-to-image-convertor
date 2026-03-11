@@ -121,6 +121,7 @@ export default function HomeEditor() {
   return (
     <div
       ref={editorRef}
+      className="gsap-editor-panel"
       style={{
         border: "1px solid var(--border)",
         borderRadius: "16px",
