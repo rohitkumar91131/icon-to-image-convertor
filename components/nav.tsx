@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import gsap from "gsap";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -16,9 +17,20 @@ const NAV_LINKS = [
 export default function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!navRef.current) return;
+    gsap.fromTo(
+      navRef.current,
+      { y: -64, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }
+    );
+  }, []);
 
   return (
     <nav
+      ref={navRef}
       style={{
         position: "fixed",
         top: 0,

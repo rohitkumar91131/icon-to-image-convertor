@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Nav from "@/components/nav";
 import HomeEditor from "@/components/home-editor";
+import GsapAnimations from "@/components/gsap-animations";
 import { LIBRARIES, LIBRARY_SLUGS } from "@/lib/libraries";
 
 export default function HomePage() {
@@ -9,6 +10,7 @@ export default function HomePage() {
   return (
     <>
       <Nav />
+      <GsapAnimations />
       <main style={{ paddingTop: "60px" }}>
 
         {/* ── Hero ──────────────────────────────────────────────────────── */}
@@ -80,16 +82,16 @@ export default function HomePage() {
 
         {/* ── Icon Packs ────────────────────────────────────────────────── */}
         <section id="packs" style={{ padding: "80px 24px", maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
+          <div className="gsap-reveal" style={{ textAlign: "center", marginBottom: "56px" }}>
             <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--foreground-muted)", fontWeight: 600, marginBottom: "12px" }}>Icon Packs</p>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.15, margin: "0 0 16px" }}>10 packs. 15,000+ icons.</h2>
             <p style={{ fontSize: "16px", color: "var(--foreground-secondary)", maxWidth: "460px", margin: "0 auto", lineHeight: 1.6 }}>From minimal outlines to detailed brands — every icon you need for your project.</p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+          <div className="gsap-stagger-parent" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
             {libraries.map((lib) => (
-              <Link key={lib.slug} href={`/${lib.slug}`} style={{ textDecoration: "none" }}>
-                <div className="card-hover" style={{ padding: "28px", borderRadius: "12px", border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", height: "100%" }}>
+              <Link key={lib.slug} href={`/${lib.slug}`} style={{ textDecoration: "none" }} className="gsap-stagger-child">
+                <div className="card-hover gsap-card-hover" style={{ padding: "28px", borderRadius: "12px", border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", height: "100%" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
                     <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: `linear-gradient(135deg, ${lib.gradientFrom}22, ${lib.gradientTo}22)`, border: `1px solid ${lib.gradientFrom}44`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0 }}>
                       {lib.emoji}
@@ -115,11 +117,11 @@ export default function HomePage() {
 
         {/* ── Features ─────────────────────────────────────────────────── */}
         <section style={{ padding: "80px 24px", maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
+          <div className="gsap-reveal" style={{ textAlign: "center", marginBottom: "56px" }}>
             <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--foreground-muted)", fontWeight: 600, marginBottom: "12px" }}>Features</p>
             <h2 style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.15, margin: 0 }}>Everything you need</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1px", border: "1px solid var(--border)", borderRadius: "16px", overflow: "hidden", background: "var(--border)" }}>
+          <div className="gsap-stagger-parent" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1px", border: "1px solid var(--border)", borderRadius: "16px", overflow: "hidden", background: "var(--border)" }}>
             {([
               { icon: "⚡", title: "Live Customization", desc: "Adjust color, size, stroke, padding, rotation and background in real time. Preview updates instantly." },
               { icon: "📦", title: "Multiple Export Formats", desc: "Download as PNG, SVG, WebP or ICO. Copy the SVG source or React component code with one click." },
@@ -130,7 +132,7 @@ export default function HomePage() {
               { icon: "📋", title: "Copy React Component", desc: "Get the import statement and JSX snippet ready to paste into your React or Next.js project." },
               { icon: "📐", title: "Pixel-perfect Output", desc: "Icons are rasterised at 300 dpi via Sharp. Clean edges, no blur — at any size from 16 to 1024 px." },
             ] as const).map((feat) => (
-              <div key={feat.title} style={{ padding: "32px", background: "var(--surface)" }}>
+              <div key={feat.title} className="gsap-stagger-child" style={{ padding: "32px", background: "var(--surface)" }}>
                 <div style={{ fontSize: "28px", marginBottom: "16px" }}>{feat.icon}</div>
                 <h3 style={{ fontSize: "16px", fontWeight: 600, letterSpacing: "-0.01em", margin: "0 0 8px", color: "#fff" }}>{feat.title}</h3>
                 <p style={{ fontSize: "14px", color: "var(--foreground-secondary)", lineHeight: 1.6, margin: 0 }}>{feat.desc}</p>
@@ -141,7 +143,7 @@ export default function HomePage() {
 
         {/* ── CTA Banner ───────────────────────────────────────────────── */}
         <section style={{ padding: "80px 24px", maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
-          <div className="cta-banner-inner" style={{ padding: "64px 40px", borderRadius: "20px", border: "1px solid var(--border)", background: "radial-gradient(ellipse at top, rgba(129,140,248,0.1) 0%, transparent 60%), var(--surface)" }}>
+          <div className="cta-banner-inner gsap-cta-banner" style={{ padding: "64px 40px", borderRadius: "20px", border: "1px solid var(--border)", background: "radial-gradient(ellipse at top, rgba(129,140,248,0.1) 0%, transparent 60%), var(--surface)" }}>
             <h2 style={{ fontSize: "clamp(24px, 4vw, 48px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.15, margin: "0 0 16px" }}>Ready to convert your first icon?</h2>
             <p style={{ fontSize: "clamp(14px, 2vw, 16px)", color: "var(--foreground-secondary)", lineHeight: 1.6, margin: "0 0 32px" }}>No signup needed. Works in the browser. Free forever.</p>
             <Link href="/lucide" style={{ padding: "14px 32px", borderRadius: "10px", background: "linear-gradient(135deg, #818cf8, #e879f9)", color: "#ffffff", fontSize: "15px", fontWeight: 700, textDecoration: "none", letterSpacing: "-0.01em", display: "inline-block" }}>
@@ -151,7 +153,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Footer ───────────────────────────────────────────────────── */}
-        <footer style={{ borderTop: "1px solid var(--border)", padding: "40px 24px", maxWidth: "1200px", margin: "0 auto" }}>
+        <footer className="gsap-footer" style={{ borderTop: "1px solid var(--border)", padding: "40px 24px", maxWidth: "1200px", margin: "0 auto" }}>
           <div className="footer-inner" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: "linear-gradient(135deg, #818cf8, #e879f9)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>⬡</div>
