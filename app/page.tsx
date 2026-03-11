@@ -21,7 +21,7 @@ export default function HomePage() {
           {/* Badge */}
           <div className="animate-fade-up" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 14px", borderRadius: "100px", border: "1px solid rgba(129,140,248,0.3)", background: "rgba(129,140,248,0.08)", marginBottom: "32px", fontSize: "13px", fontWeight: 500, color: "#a78bfa" }}>
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#a78bfa", boxShadow: "0 0 6px #a78bfa", flexShrink: 0, display: "inline-block" }} />
-            10 icon packs · 15 000+ icons · 4 export formats
+            10 icon packs · 15,000+ icons · 4 export formats
           </div>
 
           {/* Headline */}
@@ -31,7 +31,7 @@ export default function HomePage() {
 
           {/* Sub-headline */}
           <p className="animate-fade-up delay-200" style={{ fontSize: "18px", lineHeight: 1.7, color: "var(--foreground-secondary)", maxWidth: "520px", margin: "0 0 40px" }}>
-            Pick an icon from any popular React icon pack. Customize colour, size, stroke and background.
+            Pick an icon from any popular React icon pack. Customize color, size, stroke and background.
             Export as PNG, SVG, WebP or ICO — instantly, in your browser.
           </p>
 
@@ -106,7 +106,7 @@ export default function HomePage() {
         <section id="packs" style={{ padding: "80px 24px", maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "56px" }}>
             <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--foreground-muted)", fontWeight: 600, marginBottom: "12px" }}>Icon Packs</p>
-            <h2 style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.15, margin: "0 0 16px" }}>10 packs. 15 000+ icons.</h2>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 48px)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.15, margin: "0 0 16px" }}>10 packs. 15,000+ icons.</h2>
             <p style={{ fontSize: "16px", color: "var(--foreground-secondary)", maxWidth: "460px", margin: "0 auto", lineHeight: 1.6 }}>From minimal outlines to detailed brands — every icon you need for your project.</p>
           </div>
 
@@ -147,7 +147,7 @@ export default function HomePage() {
             {([
               { icon: "⚡", title: "Live Customization", desc: "Adjust color, size, stroke, padding, rotation and background in real time. Preview updates instantly." },
               { icon: "📦", title: "Multiple Export Formats", desc: "Download as PNG, SVG, WebP or ICO. Copy the SVG source or React component code with one click." },
-              { icon: "🔍", title: "Global Icon Search", desc: "Search across all 15 000+ icons in a single keystroke. Filter by category, pack or keyword." },
+              { icon: "🔍", title: "Global Icon Search", desc: "Search across all 15,000+ icons in a single keystroke. Filter by category, pack or keyword." },
               { icon: "❤️", title: "Favorites", desc: "Star any icon to save it to your local favorites list for lightning-fast access later." },
               { icon: "⌨️", title: "Keyboard Shortcuts", desc: "Copy SVG with ⌘C, cycle through preview backgrounds, download with ⌘S — no mouse needed." },
               { icon: "🔗", title: "Direct API Access", desc: "Every icon has a stable API URL. Embed icons in docs, emails or scripts without a build step." },

@@ -124,7 +124,8 @@ export default function IconEditorPage({
   }, [iconname]);
 
   // Build the preview URL — rebuild whenever any control changes
-  const previewUrl = buildApiUrl(slug, iconname, Math.max(size - padding * 2, 16), color, format === "svg" ? "png" : format);
+  const effectiveSize = Math.max(size - padding * 2, 16);
+  const previewUrl = buildApiUrl(slug, iconname, effectiveSize, color, format === "svg" ? "png" : format);
   const svgUrl = buildApiUrl(slug, iconname, size, color, "svg");
 
   // Re-generate preview when params change
@@ -375,8 +376,8 @@ export default function IconEditorPage({
                   key={previewKey}
                   src={previewUrl}
                   alt={`${iconname} preview`}
-                  width={Math.max(size - padding * 2, 16)}
-                  height={Math.max(size - padding * 2, 16)}
+                  width={effectiveSize}
+                  height={effectiveSize}
                   style={{
                     maxWidth: "100%",
                     maxHeight: "380px",
